@@ -1,6 +1,6 @@
 {
   "name": "jsoncrack-react",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Reusable JSON Crack canvas as a React component",
   "license": "Apache-2.0",
   "author": "Aykut Saraç",
@@ -56,8 +56,8 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
-    "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.4",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "@typescript-eslint/eslint-plugin": "^8.67.0",
     "@typescript-eslint/parser": "^8.67.0",
     "@vitejs/plugin-react": "^6.0.5",
