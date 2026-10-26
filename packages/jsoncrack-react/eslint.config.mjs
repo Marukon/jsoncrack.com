@@ -1,33 +1,25 @@
-import { FlatCompat } from "@eslint/eslintrc";
-import js from "@eslint/js";
-import prettier from "eslint-plugin-prettier";
+import eslint from "@eslint/js";
+import eslintConfigPrettier from "eslint-config-prettier/flat";
+import eslintPluginPrettier from "eslint-plugin-prettier/recommended";
 import unusedImports from "eslint-plugin-unused-imports";
 import { defineConfig, globalIgnores } from "eslint/config";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
+import tseslint from "typescript-eslint";
 
 export default defineConfig([
   globalIgnores(["dist", "scripts", "node_modules"]),
+  eslint.configs.recommended,
+  tseslint.configs.recommended,
+  eslintConfigPrettier,
+  eslintPluginPrettier,
   {
-    extends: [
-      ...compat.extends("eslint:recommended"),
-      ...compat.extends("prettier"),
-      ...compat.extends("plugin:@typescript-eslint/recommended"),
-    ],
-
+    languageOptions: {
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
     plugins: {
-      prettier,
       "unused-imports": unusedImports,
     },
-
     rules: {
       "@typescript-eslint/consistent-type-imports": "error",
       "unused-imports/no-unused-imports": "error",
@@ -39,18 +31,9 @@ export default defineConfig([
       "no-irregular-whitespace": "error",
       strict: ["error", "never"],
       "linebreak-style": ["error", "unix"],
-
-      quotes: [
-        "error",
-        "double",
-        {
-          avoidEscape: true,
-        },
-      ],
-
+      quotes: ["error", "double", { avoidEscape: true }],
       semi: ["error", "always"],
       "prefer-const": "error",
-
       "space-before-function-paren": [
         "error",
         {

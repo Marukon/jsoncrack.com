@@ -2,25 +2,45 @@ import React from "react";
 import { Box } from "@mantine/core";
 import styled from "styled-components";
 import { JSONCrack } from "jsoncrack-react";
-import type { NodeData } from "jsoncrack-react";
-import { useLongPress } from "use-long-press";
+import type { JSONCrackRef, NodeData } from "jsoncrack-react";
 import { SUPPORTED_LIMIT } from "../../../../constants/graph";
 import useConfig from "../../../../store/useConfig";
 import useJson from "../../../../store/useJson";
 import { useModal } from "../../../../store/useModal";
 import { NotSupported } from "./NotSupported";
-import { OptionsMenu } from "./OptionsMenu";
+import { OpenInToDiagram } from "./OpenInToDiagram";
 import { SecureInfo } from "./SecureInfo";
-import { ZoomControl } from "./ZoomControl";
+import { Toolbar } from "./Toolbar";
 import useGraph from "./stores/useGraph";
 
 const StyledEditorWrapper = styled.div<{ $widget: boolean }>`
   width: 100%;
   height: 100%;
 
-  .jsoncrack-space,
-  .jsoncrack-space:active {
+  .jsoncrack-space {
     cursor: url("/assets/cursor.svg"), auto;
+  }
+
+  .jsoncrack-space:active {
+    cursor: grabbing;
+  }
+
+  .jsoncrack-space rect {
+    rx: 5;
+    ry: 5;
+    stroke-width: 1;
+    filter: drop-shadow(
+      2px 2px 0
+        ${({ theme }) =>
+          theme.BACKGROUND_SECONDARY === "#f2f3f5"
+            ? "rgba(15, 23, 42, 0.25)"
+            : "rgba(0, 0, 0, 0.6)"}
+    );
+  }
+
+  .jsoncrack-space path {
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 `;
 
@@ -30,26 +50,25 @@ interface GraphProps {
 
 export const GraphView = ({ isWidget = false }: GraphProps) => {
   const setViewPort = useGraph(state => state.setViewPort);
+  const setJsonCrackRef = useGraph(state => state.setJsonCrackRef);
   const direction = useGraph(state => state.direction);
   const setSelectedNode = useGraph(state => state.setSelectedNode);
+  const setCollapsedCount = useGraph(state => state.setCollapsedCount);
   const gesturesEnabled = useConfig(state => state.gesturesEnabled);
   const rulersEnabled = useConfig(state => state.rulersEnabled);
   const darkmodeEnabled = useConfig(state => state.darkmodeEnabled);
   const json = useJson(state => state.json);
   const setVisible = useModal(state => state.setVisible);
+  const jsonCrackRef = React.useRef<JSONCrackRef>(null);
 
-  const callback = React.useCallback(() => {
-    const canvas = document.querySelector(".jsoncrack-canvas") as HTMLDivElement | null;
-    canvas?.classList.add("dragging");
-  }, []);
+  React.useEffect(() => {
+    setJsonCrackRef(jsonCrackRef);
+  }, [setJsonCrackRef]);
 
-  const bindLongPress = useLongPress(callback, {
-    threshold: 150,
-    onFinish: () => {
-      const canvas = document.querySelector(".jsoncrack-canvas") as HTMLDivElement | null;
-      canvas?.classList.remove("dragging");
-    },
-  });
+  const handleCollapseChange = React.useCallback(
+    (paths: string[]) => setCollapsedCount(paths.length),
+    [setCollapsedCount]
+  );
 
   const blurOnClick = React.useCallback(() => {
     if ("activeElement" in document) {
@@ -69,16 +88,16 @@ export const GraphView = ({ isWidget = false }: GraphProps) => {
 
   return (
     <Box pos="relative" h="100%" w="100%">
-      {!isWidget && <OptionsMenu />}
       {!isWidget && <SecureInfo />}
-      <ZoomControl />
+      {!isWidget && <OpenInToDiagram />}
+      {!isWidget && <Toolbar />}
       <StyledEditorWrapper
         $widget={isWidget}
         onContextMenu={event => event.preventDefault()}
         onClick={blurOnClick}
-        {...bindLongPress()}
       >
         <JSONCrack
+          ref={jsonCrackRef}
           key={[direction, gesturesEnabled, rulersEnabled].join("-")}
           json={json}
           theme={darkmodeEnabled ? "dark" : "light"}
@@ -90,6 +109,7 @@ export const GraphView = ({ isWidget = false }: GraphProps) => {
           centerOnLayout
           onViewportCreate={setViewPort}
           onNodeClick={handleNodeClick}
+          onCollapseChange={handleCollapseChange}
           renderNodeLimitExceeded={() => <NotSupported />}
         />
       </StyledEditorWrapper>

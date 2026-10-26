@@ -7,7 +7,7 @@ import useFile from "../../store/useFile";
 
 loader.config({
   paths: {
-    vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.2/min/vs",
+    vs: "https://unpkg.com/monaco-editor@0.55.1/min/vs",
   },
 });
 
@@ -30,8 +30,7 @@ const TextEditor = () => {
   const theme = useConfig(state => (state.darkmodeEnabled ? "vs-dark" : "light"));
   const fileType = useFile(state => state.format);
   const jsonDefaults = (monaco?.languages as any)?.json?.jsonDefaults as
-    | { setDiagnosticsOptions: (options: unknown) => void }
-    | undefined;
+    { setDiagnosticsOptions: (options: unknown) => void } | undefined;
 
   React.useEffect(() => {
     if (!jsonDefaults) return;
